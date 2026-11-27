@@ -76,5 +76,20 @@ function adim(array $s, string $a): array {
         }
     }
 
+    elseif (str_starts_with($a, 'T-')) {
+        [, $uKod, $adetStr] = explode('-', $a);
+        $adet = (int)$adetStr;
+
+        if (isset($s['urunler'][$uKod]) && $adet > 0) {
+            $ekMaliyet = $s['tedarik_zam'] ?? 0;
+            $maliyet = 60 + $ekMaliyet + ($s['urunler'][$uKod]['fiyat'] * $adet);
+            if ($s['kasa'] >= $maliyet) {
+                $s['kasa'] -= $maliyet;
+                $s['urunler'][$uKod]['stok'] += $adet;
+                $s['log'][] = "🚚 {$s['urunler'][$uKod]['ad']} tedarik: {$adet} adet";
+            }
+        }
+    }
+
     return $s;
 }
