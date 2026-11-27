@@ -91,5 +91,32 @@ function adim(array $s, string $a): array {
         }
     }
 
+    elseif ($a === 'G') {
+        $s['kasa'] -= 60;
+        $s['memnuniyet'] = max(0, $s['memnuniyet'] - 5);
+
+        $s['urunler']['tost']['stok'] = max(0, $s['urunler']['tost']['stok'] - 3);
+        $s['urunler']['hamburger']['stok'] = max(0, $s['urunler']['hamburger']['stok'] - 2);
+
+        $s['gunluk_musteri'] = 0;
+        $s['gunluk_ret'] = 0;
+        $s['yogunluk'] = false;
+
+        $kapananGun = $s['gun'];
+        if ($s['gun'] >= 5) {
+            $s['bitti'] = true;
+            $s['kazandi'] = ($s['kasa'] >= 1000 && $s['memnuniyet'] >= 80);
+        } else {
+            $s['gun']++;
+        }
+
+        $s['log'][] = "🌙 Gün {$kapananGun} kapandı";
+    }
+
+    if ($s['kasa'] < 0 || $s['memnuniyet'] <= 0) {
+        $s['bitti'] = true;
+        $s['kazandi'] = false;
+    }
+
     return $s;
 }
