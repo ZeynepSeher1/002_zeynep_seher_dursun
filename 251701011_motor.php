@@ -55,6 +55,25 @@ function adim(array $s, string $a): array {
 
             $s['log'][] = "{$m['ad']} ({$m['tip']}, bütçe {$m['butce']} TL) {$urun['ad']} istiyor → Satış yok";
         }
+
+        if ($s['elektrik'] > 0) {
+            $s['elektrik']--;
+        }
+
+        $olay = olay($s['no'], $s['musteri_sira']);
+        if ($olay === 'elektrik') {
+            $s['elektrik'] = 2;
+            $s['log'][] = "⚡ Elektrik kesintisi";
+        } elseif ($olay === 'yogunluk') {
+            $s['yogunluk'] = true;
+            $s['log'][] = "👥 Öğle yoğunluğu";
+        } elseif ($olay === 'tedarik') {
+            $s['tedarik_zam'] = ($s['tedarik_zam'] ?? 0) + 30;
+            $s['log'][] = "📦 Tedarik sorunu";
+        } elseif ($olay === 'bahsis') {
+            $s['kasa'] += 20;
+            $s['log'][] = "😊 Memnun müşteri";
+        }
     }
 
     return $s;
