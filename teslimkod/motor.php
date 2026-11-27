@@ -7,7 +7,6 @@ function adim(array $s, string $a): array {
     $x = $s['no'] % 10;
     $y = intdiv($s['no'], 10) % 10;
 
-    // 1. MÜŞTERİ HAMLESİ ('M')
     if ($a === 'M') {
         if ($s['gunluk_musteri'] >= 5) return $s;
 
@@ -18,22 +17,19 @@ function adim(array $s, string $a): array {
         $uKod = $m['urun'];
         $urun = &$s['urunler'][$uKod];
 
-        // Elektrik kesintisinde sıcak/elektrikli ürünler satılamaz
+       
         $elektrikGerektirir = in_array($uKod, ['tost', 'hamburger', 'kahve']);
         $elektrikEngeli = ($s['elektrik'] > 0 && $elektrikGerektirir);
 
-        // Öğle yoğunluğu varsa müşteri 2 adet istiyor
         $adet = $s['yogunluk'] ? 2 : 1;
         $s['yogunluk'] = false;
 
-        // Birim fiyat ve Burslu Öğrenci %10 indirimi
         $birimFiyat = $urun['fiyat'];
         if ($m['tip'] === 'Burslu Öğrenci') {
             $birimFiyat = (int)round($birimFiyat * 0.9);
         }
         $toplamTutar = $birimFiyat * $adet;
 
-        // Satış Kontrolü
         if (!$elektrikEngeli && $urun['stok'] >= $adet && $m['butce'] >= $toplamTutar) {
             $urun['stok'] -= $adet;
             $s['kasa'] += $toplamTutar;
@@ -41,7 +37,6 @@ function adim(array $s, string $a): array {
             $s['ret_sayac'][$uKod] = 0;
             $s['memnuniyet'] = min(100, $s['memnuniyet'] + 2);
 
-            // Çok satılan ürünlere +5 TL zam (Tost 65, Ayran 25, Su 15)
             if (!$s['zam'][$uKod] && in_array($uKod, ['tost', 'ayran', 'su'])) {
                 $urun['fiyat'] += 5;
                 $s['zam'][$uKod] = true;
@@ -55,7 +50,6 @@ function adim(array $s, string $a): array {
             $s['ret_sayac'][$uKod]++;
             $s['memnuniyet'] = max(0, $s['memnuniyet'] - 3);
 
-            // Hamburger gibi üründe 2. rette %10 fiyat indirimi
             if ($s['ret_sayac'][$uKod] === 2 && $urun['fiyat'] >= 80) {
                 $urun['fiyat'] = (int)round($urun['fiyat'] * 0.9);
                 $s['zam'][$uKod] = true;
@@ -68,7 +62,6 @@ function adim(array $s, string $a): array {
             $s['elektrik']--;
         }
 
-        // Müşteri sonrası rastgele olay
         $olay = olay($s['no'], $s['musteri_sira']);
         if ($olay === 'elektrik') {
             $s['elektrik'] = 2;
@@ -85,7 +78,6 @@ function adim(array $s, string $a): array {
         }
     }
 
-    // 2. TEDARİK HAMLESİ ('T-urun-adet')
     elseif (str_starts_with($a, 'T-')) {
         [, $uKod, $adetStr] = explode('-', $a);
         $adet = (int)$adetStr;
@@ -101,12 +93,10 @@ function adim(array $s, string $a): array {
         }
     }
 
-    // 3. GÜNÜ KAPAT ('G')
     elseif ($a === 'G') {
         $s['kasa'] -= 60;
         $s['memnuniyet'] = max(0, $s['memnuniyet'] - 5);
 
-        // Gün sonu fire (Tost -3, Hamburger -2)
         $s['urunler']['tost']['stok'] = max(0, $s['urunler']['tost']['stok'] - 3);
         $s['urunler']['hamburger']['stok'] = max(0, $s['urunler']['hamburger']['stok'] - 2);
 
